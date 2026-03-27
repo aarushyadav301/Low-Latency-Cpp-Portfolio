@@ -37,7 +37,6 @@ string OrderBook::processOrder(orderStruct oS) {
 
 // Matching Engine Methods
 // ====================================================================================================================================
-
 string OrderBook::cancelOrder(int id) {
     if (processedOrders.count(id)) {
         return ("FAILED");
@@ -80,7 +79,12 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
     double averageCost = totalCost / filledShares;
     string output = "FILLED " + to_string(filledShares) + " SHARES AT AN AVERAGE COST OF $" + to_string(averageCost);
     cout << output << endl;
-    return (output);
+    
+    if (filledShares < reqShares) {
+        return ("PARTIAL");
+    }
+
+    return ("FILLED");
 }
 
 
@@ -93,17 +97,17 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
 
 
 string OrderBook::buyLimitOrder(orderStruct oS) {
-    // TODO
-
-    return (" ");
+    buyLimitInsert(oS);
+    cout << "BUY INSERTED" << endl;
+    return ("Inserted");
 }
 
 
 
 string OrderBook::sellLimitOrder(orderStruct oS) {
     sellLimitInsert(oS);
-    cout << "INSERTED!" << endl;
-    return ("INSERTED");
+    cout << "SELL INSERTED" << endl;
+    return ("Inserted");
 }
 
 
