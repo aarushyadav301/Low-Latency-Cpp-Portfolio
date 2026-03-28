@@ -55,9 +55,6 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
     orderStruct bestAsk = getMinAsk();
 
     while (bestAsk.id != -1) {
-        cout << "BEST SHARES " << bestAsk.shares << endl;
-        cout << "BEST PRICE " << bestAsk.price << endl;
-
         int bestShares = bestAsk.shares;
         double bestPrice = bestAsk.price;
         int addedShares = min(reqShares - filledShares, bestShares);
@@ -67,7 +64,7 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
 
         if (filledShares == reqShares) {
             if (bestShares - addedShares) {
-                Queue::orderStruct adding("SELL", "LIMIT", bestShares - addedShares, bestPrice, bestAsk.id);
+                orderStruct adding("SELL", "LIMIT", bestShares - addedShares, bestPrice, bestAsk.id);
                 sellLimitInsert(adding);
             }
             break;
@@ -89,9 +86,39 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
 
 
 string OrderBook::sellMarketOrder(orderStruct oS) {
-    // TODO
+    int filledShares = 0;
+    int reqShares = oS.shares;
+    double totalGain = 0.0;
 
-    return (" ");
+    orderStruct bestBid = getMaxBid();
+
+    while (bestBid.id != -1) {
+        int bestShares = bestBid.shares;
+        double bestPrice = bestBid.price;
+        int addedShares = min(reqShares - filledShares, bestShares);
+        filledShares += addedShares;
+        totalGain += (addedShares * bestPrice);
+        removeMaxBid();
+
+        if (filledShares == reqShares) {
+            if (bestShares - addedShares) {
+                orderStruct adding("SELL", "LIMIT", bestShares - addedShares, bestPrice, bestBid.id);
+                sellLimitInsert(adding);
+            }
+            break;
+        }
+
+        bestBid = getMaxBid();
+    }
+
+    string output = "SOLD " + to_string(filledShares) + " shares for a total gain of $" + to_string(totalGain);
+    cout << output << endl;
+    
+    if (filledShares < reqShares) {
+        return ("PARTIAL");
+    }
+
+    return ("FILLED");
 }
 
 
@@ -178,22 +205,22 @@ void OrderBook::removeMinAsk() {
 }
 
 void OrderBook::removeMaxBid() {
-    sellLimitSize--;
-    sellLimitHeap[0] = sellLimitHeap[sellLimitSize];
-    sellLimitHeap[sellLimitSize].id = -1;
+    buyLimitSize--;
+    buyLimitHeap[0] = buyLimitHeap[buyLimitSize];
+    buyLimitHeap[buyLimitSize].id = -1;
 
     int cur = 0;
 
-    while (sellLimitHeap[cur].id != -1) {
+    while (buyLimitHeap[cur].id != -1) {
         int largest = cur;
         int left = 2 * cur + 1;
         int right = 2 * cur + 2;
 
-        if (left <= sellLimitSize && sellLimitHeap[left].price > sellLimitHeap[largest].price) {
+        if (left <= buyLimitSize && buyLimitHeap[left].price > buyLimitHeap[largest].price) {
             largest = left;
         }
 
-        if (right <= sellLimitSize && sellLimitHeap[right].price > sellLimitHeap[largest].price) {
+        if (right <= buyLimitSize && buyLimitHeap[right].price > buyLimitHeap[largest].price) {
             largest = right;
         }
 
@@ -201,7 +228,7 @@ void OrderBook::removeMaxBid() {
             break;
         }
 
-        std::swap(sellLimitHeap[cur], sellLimitHeap[largest]);
+        std::swap(buyLimitHeap[cur], buyLimitHeap[largest]);
         cur = largest;
     }
 }
