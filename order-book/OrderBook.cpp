@@ -37,10 +37,28 @@ string OrderBook::processOrder(orderStruct oS) {
 
 // Matching Engine Methods
 // ====================================================================================================================================
+/*
+ * Three scenarios: 
+ * 
+ * 1) Order has already been fully processed -> cancel order fails (easy return)
+ *    - Use the processedOrders data structure to tell
+ * 
+ * 2) Order has not been processed yet 
+ *    - Run through appropriate heap and delete node 
+ * 
+ * 3) Order has been partially processed
+ *    - Run through appropriate heap and delete node
+ * 
+ *
+ */
+
+
 string OrderBook::cancelOrder(int id) {
+    // Prolly need to change .count to some other detect->exit feature (possible waste of time here)
     if (processedOrders.count(id)) {
         return ("FAILED");
-    }
+    } 
+    
 
     // TODO: Actually cancel order
     return (" ");
@@ -79,6 +97,8 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
     
     if (filledShares < reqShares) {
         return ("PARTIAL");
+
+        // Partial market orders must be stored in some pending list with ids
     }
 
     return ("FILLED");
@@ -116,12 +136,26 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
     
     if (filledShares < reqShares) {
         return ("PARTIAL");
+
+        // Partial market orders must be stored in some pending list with ids
     }
 
     return ("FILLED");
 }
 
-
+/*
+ * TODO Logic: 
+ * Buy limits follow specific logic flow: 
+ * 
+ * If there exists sell limit orders with prices below the buy limit price, 
+ *   - Execute at the cheapest sell limit price (repeatedly until satisfied)
+ *     - If there exist multiple cheapest sell limit prices, execute them in chronological order (better heap sorting methods required)
+ *   - If all sell limits below buy price have been executed and order is still not fulfilled, store onto buyLimitHeap
+ * 
+ * Else,
+ *   - Store buy limit order onto buyLimitHeap
+ * 
+ */
 
 string OrderBook::buyLimitOrder(orderStruct oS) {
     buyLimitInsert(oS);
@@ -130,7 +164,19 @@ string OrderBook::buyLimitOrder(orderStruct oS) {
 }
 
 
-
+/*
+ * TODO Logic: 
+ * Sell limits follow specific logic flow: 
+ * 
+ * If there exists buy limit orders with prices above the sell limit price, 
+ *   - Execute at the most expensive buy limit price (repeatedly until satisfied)
+ *     - If there exist multiple expensive buy limit prices, execute them in chronological order (better heap sorting methods required)
+ *   - If all buy limits above buy price have been executed and order is still not fulfilled, store onto sellLimitHeap
+ * 
+ * Else,
+ *   - Store sell limit order onto sellLimitHeap
+ * 
+ */
 string OrderBook::sellLimitOrder(orderStruct oS) {
     sellLimitInsert(oS);
     cout << "SELL INSERTED" << endl;
@@ -199,7 +245,7 @@ void OrderBook::removeMinAsk() {
             break;
         }
 
-        std::swap(sellLimitHeap[cur], sellLimitHeap[smallest]);
+        swap(sellLimitHeap[cur], sellLimitHeap[smallest]);
         cur = smallest;
     }
 }
@@ -228,7 +274,7 @@ void OrderBook::removeMaxBid() {
             break;
         }
 
-        std::swap(buyLimitHeap[cur], buyLimitHeap[largest]);
+        swap(buyLimitHeap[cur], buyLimitHeap[largest]);
         cur = largest;
     }
 }
