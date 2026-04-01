@@ -3,10 +3,10 @@
 clean: 
 	rm *.o
 
-OrderBook.o: OrderBook.cpp
+OrderBook.o: OrderBook.cpp OrderBook.hpp
 	g++ -c -O2 OrderBook.cpp
 
-Queue.o: Queue.cpp
+Queue.o: Queue.cpp Queue.hpp
 	g++ -c -O2 Queue.cpp
 
 main.o: main.cpp
