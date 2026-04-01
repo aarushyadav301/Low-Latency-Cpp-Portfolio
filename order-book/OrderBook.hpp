@@ -3,7 +3,7 @@
 #ifndef ORDERBOOK
 #define ORDERBOOK
 
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 #include <string>
 
@@ -34,6 +34,10 @@ namespace Order {
             unordered_map<int, orderStruct> pendingOrders;
             unordered_map<int, orderStruct> processedOrders;
     
+            // Index (Id) -> Heap location
+            vector<int> sellHeapMap{200};
+            vector<int> buyHeapMap{200};
+
             string cancelOrder(int id);
     
             string buyMarketOrder(orderStruct oS);
@@ -70,8 +74,8 @@ namespace Order {
             orderStruct getMinAsk();
             orderStruct getMaxBid();
     
-            void removeMinAsk();
-            void removeMaxBid();
+            void removeAsk(int heapLoc);
+            void removeBid(int heapLoc);
     
     
             // Market Info Methods: 

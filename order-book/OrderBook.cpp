@@ -78,7 +78,7 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
         int addedShares = min(reqShares - filledShares, bestShares);
         filledShares += addedShares;
         totalCost += (addedShares * bestPrice);
-        removeMinAsk();
+        removeAsk(0);
 
         if (filledShares == reqShares) {
             if (bestShares - addedShares) {
@@ -118,7 +118,7 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
         int addedShares = min(reqShares - filledShares, bestShares);
         filledShares += addedShares;
         totalGain += (addedShares * bestPrice);
-        removeMaxBid();
+        removeBid(0);
 
         if (filledShares == reqShares) {
             if (bestShares - addedShares) {
@@ -193,23 +193,39 @@ int OrderBook::findHeapParent(int child) {
 
 void OrderBook::sellLimitInsert(orderStruct oS) {
     int cur = sellLimitSize;
-    sellLimitHeap[sellLimitSize++] = oS;
+    sellLimitHeap[sellLimitSize] = oS;
+    sellHeapMap[oS.id] = sellLimitSize++;
+
+    cout << "order struct " << oS.id << " inserted in sell heap at " << sellHeapMap[oS.id] << endl;
 
     while (cur != 0 && sellLimitHeap[findHeapParent(cur)].price > sellLimitHeap[cur].price) {
+        orderStruct pS = sellLimitHeap[findHeapParent(cur)];
+        sellHeapMap[pS.id] = cur;
+        sellHeapMap[oS.id] = findHeapParent(cur);
         swap(sellLimitHeap[findHeapParent(cur)], sellLimitHeap[cur]);
         cur = findHeapParent(cur);
-    }
 
-    cout << sellLimitHeap[cur].shares << endl;
+        cout << "order struct " << pS.id << " swapped to " << sellHeapMap[pS.id] << endl;
+        cout << "order struct " << oS.id << " swapped to " << sellHeapMap[oS.id] << endl;
+    }
 }
 
 void OrderBook::buyLimitInsert(orderStruct oS) {
     int cur = buyLimitSize;
-    buyLimitHeap[buyLimitSize++] = oS;
+    buyLimitHeap[buyLimitSize] = oS;
+    buyHeapMap[oS.id] = buyLimitSize++;
+
+    cout << "order struct " << oS.id << " inserted in buy heap at " << buyHeapMap[oS.id] << endl;
 
     while (cur != 0 && buyLimitHeap[findHeapParent(cur)].price < buyLimitHeap[cur].price) {
+        orderStruct pS = buyLimitHeap[findHeapParent(cur)];
+        buyHeapMap[pS.id] = cur;
+        buyHeapMap[oS.id] = findHeapParent(cur);
         swap(buyLimitHeap[findHeapParent(cur)], buyLimitHeap[cur]);
         cur = findHeapParent(cur);
+
+        cout << "order struct " << pS.id << " swapped to " << buyHeapMap[pS.id] << endl;
+        cout << "order struct " << oS.id << " swapped to " << buyHeapMap[oS.id] << endl;
     }
 }
 
@@ -221,12 +237,23 @@ orderStruct OrderBook::getMaxBid() {
     return (buyLimitHeap[0]);
 }
 
-void OrderBook::removeMinAsk() {
+/*
+ * TODO: 
+ * Refactor removeMinAsk so it accepts orderId paramter
+ * orderId parameter will be used for targeted node deletions 
+ * beyond just the minimum/maximum heap elements. 
+ *
+ *
+ * This extension will be needed for the cancelOrder buildout.
+ *
+ */
+
+void OrderBook::removeAsk(int heapLoc) {
     sellLimitSize--;
-    sellLimitHeap[0] = sellLimitHeap[sellLimitSize];
+    sellLimitHeap[heapLoc] = sellLimitHeap[sellLimitSize];
     sellLimitHeap[sellLimitSize].id = -1;
 
-    int cur = 0;
+    int cur = heapLoc;
 
     while (sellLimitHeap[cur].id != -1) {
         int smallest = cur;
@@ -250,12 +277,23 @@ void OrderBook::removeMinAsk() {
     }
 }
 
-void OrderBook::removeMaxBid() {
+/*
+ * TODO: 
+ * Refactor removeMaxBid so it accepts orderId paramter
+ * orderId parameter will be used for targeted node deletions 
+ * beyond just the minimum/maximum heap elements. 
+ *
+ *
+ * This extension will be needed for the cancelOrder buildout.
+ *
+ */
+
+void OrderBook::removeBid(int heapLoc) {
     buyLimitSize--;
-    buyLimitHeap[0] = buyLimitHeap[buyLimitSize];
+    buyLimitHeap[heapLoc] = buyLimitHeap[buyLimitSize];
     buyLimitHeap[buyLimitSize].id = -1;
 
-    int cur = 0;
+    int cur = heapLoc;
 
     while (buyLimitHeap[cur].id != -1) {
         int largest = cur;
