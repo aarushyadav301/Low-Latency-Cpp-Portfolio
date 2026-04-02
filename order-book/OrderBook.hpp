@@ -37,8 +37,8 @@ namespace Order {
             unordered_set<int> buyOrders;
     
             // Index (Id) -> Heap location
-            vector<int> sellHeapMap{200};
-            vector<int> buyHeapMap{200};
+            vector<int> sellHeapMap{1000};
+            vector<int> buyHeapMap{1000};
 
             string cancelOrder(int id);
     
@@ -62,8 +62,8 @@ namespace Order {
              * 
              */ 
             
-            vector <orderStruct> sellLimitHeap{200};
-            vector <orderStruct> buyLimitHeap{200};
+            vector <orderStruct> sellLimitHeap{1000};
+            vector <orderStruct> buyLimitHeap{1000};
             int sellLimitSize = 0;
             int buyLimitSize = 0;
     
