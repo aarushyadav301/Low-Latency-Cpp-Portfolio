@@ -19,9 +19,9 @@ The memory pool eliminates heap allocation entirely through pre-allocation at st
 
 ## Memory Pool
 
-> `memory-pool/` — Header-only, fully templated fixed-size allocator
+> `memory-pool/`: Header-only, fully templated fixed-size allocator
 
-A `MemoryPool<T, N>` pre-allocates N blocks of type T at construction, organized as a LIFO free list using a `union` to overlay the list pointer directly onto unallocated block memory. This means zero bytes of auxiliary metadata per block — the free list structure lives inside the memory it manages.
+A `MemoryPool<T, N>` pre-allocates N blocks of type T at construction, organized as a LIFO free list using a `union` to overlay the list pointer directly onto unallocated block memory. This means zero bytes of auxiliary metadata per block (the free list structure lives inside the memory it manages).
 
 **Highlights:**
 - O(1) deterministic `allocate()` and `deallocate()`: single pointer swap, no OS involvement
@@ -65,7 +65,7 @@ make
 ./program
 ```
 
-## Roadmap
+## Future Work
 
 - **SPSC Lock-Free Queue**: single-producer single-consumer queue using acquire/release atomics, no mutex on the critical path
 - **Two-thread architecture**: dedicated I/O thread feeding the matching engine via SPSC queue, zero blocking on the matching path
