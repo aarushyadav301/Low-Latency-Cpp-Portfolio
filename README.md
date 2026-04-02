@@ -61,7 +61,7 @@ Each component builds independently:
 
 # Order Book
 cd order-book
-make
+make program
 ./program
 ```
 
