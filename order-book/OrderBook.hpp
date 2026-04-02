@@ -4,6 +4,7 @@
 #define ORDERBOOK
 
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <string>
 
@@ -33,6 +34,7 @@ namespace Order {
              */ 
             unordered_map<int, orderStruct> pendingOrders;
             unordered_map<int, orderStruct> processedOrders;
+            unordered_set<int> buyOrders;
     
             // Index (Id) -> Heap location
             vector<int> sellHeapMap{200};

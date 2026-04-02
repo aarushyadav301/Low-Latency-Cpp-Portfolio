@@ -21,6 +21,7 @@ string OrderBook::processOrder(orderStruct oS) {
                 return (buyMarketOrder(oS));
             }
             else {
+                buyOrders.insert(oS.id);
                 return (buyLimitOrder(oS));
             }
         }
@@ -56,12 +57,18 @@ string OrderBook::processOrder(orderStruct oS) {
 string OrderBook::cancelOrder(int id) {
     // Prolly need to change .count to some other detect->exit feature (possible waste of time here)
     if (processedOrders.count(id)) {
-        return ("FAILED");
+        cout << "CANCELLATION FAILED ORDER " << id << " ALREADY EXECUTED" << endl;
     } 
-    
 
-    // TODO: Actually cancel order
-    return (" ");
+    if (buyOrders.count(id)) {
+        removeBid(buyHeapMap[id]);
+    }
+    else {
+        removeAsk(sellHeapMap[id]);
+    }
+
+    cout << "SUCCESSFUL CANCELLATION OF ORDER " << id << endl;
+    return ("");
 }
 
 

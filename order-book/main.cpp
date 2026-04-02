@@ -43,7 +43,7 @@ int main() {
             order.shares = shares;
             order.price = price;
         }
-        else {
+        else if (input[0] == 'S') {
             order.action = "SELL";
             string nums;
 
@@ -60,6 +60,15 @@ int main() {
             double price = stod(nums.substr(nums.find_first_of("$") + 1, len));
             order.shares = shares;
             order.price = price;
+        }
+        else {
+            // Cancel order
+            int cancelId = stoi(input.substr(7, len));
+            order.action = "CANCEL";
+            order.id = cancelId;
+            cout << "CANCELLING ORDER " << order.id << endl;
+            oB.processOrder(order);
+            continue;
         }
 
         if (order.type == "MARKET") {
