@@ -18,8 +18,8 @@ The engine processes four order types through a unified `processOrder()` interfa
 
 **Dual Heap Design**
 
-- `sellLimitHeap` — min-heap sorted by price ascending. The root is always the best ask (cheapest sell).
-- `buyLimitHeap` — max-heap sorted by price descending. The root is always the best bid (most expensive buy).
+- `sellLimitHeap` → min-heap sorted by price ascending. The root is always the best ask (cheapest sell).
+- `buyLimitHeap` → max-heap sorted by price descending. The root is always the best bid (most expensive buy).
 - Both heaps are pre-allocated at 200 slots to eliminate dynamic memory allocation on the critical path.
 
 **Heap Position Maps**
@@ -30,8 +30,8 @@ The engine processes four order types through a unified `processOrder()` interfa
 
 **Order Tracking**
 
-- `buyLimits` — an unordered_set of IDs tracking which resting orders are on the bid side, used by `cancelOrder` to route to the correct heap without storing redundant side information on the order itself.
-- `processedOrders` — tracks fully filled orders so cancel requests on completed orders fail fast.
+- `buyLimits` → an unordered_set of IDs tracking which resting orders are on the bid side, used by `cancelOrder` to route to the correct heap without storing redundant side information on the order itself.
+- `processedOrders` → tracks fully filled orders so cancel requests on completed orders fail fast.
 
 ## Key Operations
 
@@ -71,7 +71,7 @@ q  # Quit the program when you're done
 
 ## What's In Progress
 
-- Crossing limit order matching — incoming limit orders that cross the spread should execute immediately against resting orders before inserting any remainder
-- Price representation — migrating from `double` to `uint64` integer cents to eliminate floating point non-determinism
+- Crossing limit order matching: incoming limit orders that cross the spread should execute immediately against resting orders before inserting any remainder
+- Price representation: migrating from `double` to `uint64` integer cents to eliminate floating point non-determinism
 - Last traded price tracking
 - Two-thread architecture: dedicated I/O thread feeding a lock-free SPSC queue consumed by the matching engine
