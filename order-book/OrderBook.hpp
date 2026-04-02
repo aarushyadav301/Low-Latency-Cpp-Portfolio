@@ -78,11 +78,6 @@ namespace Order {
     
             void removeAsk(int heapLoc);
             void removeBid(int heapLoc);
-    
-    
-            // Market Info Methods: 
-            double bestAsk;
-            double bestBid;
     };    
 }
 

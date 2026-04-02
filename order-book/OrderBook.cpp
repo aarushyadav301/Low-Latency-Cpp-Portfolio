@@ -38,22 +38,6 @@ string OrderBook::processOrder(orderStruct oS) {
 
 // Matching Engine Methods
 // ====================================================================================================================================
-/*
- * Three scenarios: 
- * 
- * 1) Order has already been fully processed -> cancel order fails (easy return)
- *    - Use the processedOrders data structure to tell
- * 
- * 2) Order has not been processed yet 
- *    - Run through appropriate heap and delete node 
- * 
- * 3) Order has been partially processed
- *    - Run through appropriate heap and delete node
- * 
- *
- */
-
-
 string OrderBook::cancelOrder(int id) {
     // Prolly need to change .count to some other detect->exit feature (possible waste of time here)
     if (processedOrders.count(id)) {
@@ -104,8 +88,6 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
     
     if (filledShares < reqShares) {
         return ("PARTIAL");
-
-        // Partial market orders must be stored in some pending list with ids
     }
 
     return ("FILLED");
@@ -143,8 +125,6 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
     
     if (filledShares < reqShares) {
         return ("PARTIAL");
-
-        // Partial market orders must be stored in some pending list with ids
     }
 
     return ("FILLED");
@@ -165,9 +145,50 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
  */
 
 string OrderBook::buyLimitOrder(orderStruct oS) {
-    buyLimitInsert(oS);
-    cout << "BUY INSERTED" << endl;
-    return ("Inserted");
+    int filledShares = 0;
+    double totalCost = 0.0;
+    orderStruct cheapestAsk = getMinAsk();
+    while (cheapestAsk.price <= oS.price) {
+        if (cheapestAsk.shares + filledShares <= oS.shares) {
+            totalCost += (cheapestAsk.shares * cheapestAsk.price);
+            filledShares += cheapestAsk.shares;
+            processedOrders[cheapestAsk.id] = cheapestAsk;
+
+            cout << "Sell limit order " << cheapestAsk.id << " has been fully filled (" << cheapestAsk.shares << " shares at an average price of $" << cheapestAsk.price << ")" << endl;
+            removeAsk(0);
+            cheapestAsk = getMinAsk();
+        }
+        else {
+            int adding = oS.shares - filledShares;
+            totalCost += (adding * cheapestAsk.price);
+            filledShares = oS.shares;
+            
+            orderStruct insertingOrder = cheapestAsk;
+            insertingOrder.shares -= adding;
+
+            cout << "Sell limit order " << cheapestAsk.id << " has been partially filled (" << adding << " shares at an average price of $" << cheapestAsk.price << ")" << endl;
+            removeAsk(0);
+            sellLimitInsert(insertingOrder);
+            break;
+        } 
+    }
+
+    double avgCost = totalCost / filledShares;
+
+    if (filledShares == oS.shares) {
+        cout << "Buy limit order " << oS.id << " has fully filled (" << filledShares << " shares at an average cost of $" << avgCost << ")" << endl;
+    }
+    else if (filledShares > 0) {
+        cout << "Buy limit order " << oS.id << " has partially filled (" << filledShares << " shares at an average cost of $" << avgCost << ")" << endl;
+        oS.shares -= filledShares;
+        buyLimitInsert(oS);
+        cout << "Buy limit order " << oS.id << " inserted with " << oS.shares << " shares waiting to be bought at price $" << oS.price << " or better" << endl;
+    }
+    else {
+        cout << "Buy limit order " << oS.id << " inserted with " << oS.shares << " shares waiting to be bought at price $" << oS.price << " or better" << endl;
+        buyLimitInsert(oS);
+    }
+    return("");
 }
 
 
@@ -244,17 +265,6 @@ orderStruct OrderBook::getMaxBid() {
     return (buyLimitHeap[0]);
 }
 
-/*
- * TODO: 
- * Refactor removeMinAsk so it accepts orderId paramter
- * orderId parameter will be used for targeted node deletions 
- * beyond just the minimum/maximum heap elements. 
- *
- *
- * This extension will be needed for the cancelOrder buildout.
- *
- */
-
 void OrderBook::removeAsk(int heapLoc) {
     sellLimitSize--;
     sellLimitHeap[heapLoc] = sellLimitHeap[sellLimitSize];
@@ -283,17 +293,6 @@ void OrderBook::removeAsk(int heapLoc) {
         cur = smallest;
     }
 }
-
-/*
- * TODO: 
- * Refactor removeMaxBid so it accepts orderId paramter
- * orderId parameter will be used for targeted node deletions 
- * beyond just the minimum/maximum heap elements. 
- *
- *
- * This extension will be needed for the cancelOrder buildout.
- *
- */
 
 void OrderBook::removeBid(int heapLoc) {
     buyLimitSize--;
@@ -327,5 +326,5 @@ void OrderBook::removeBid(int heapLoc) {
 // Market Info Methods
 // ====================================================================================================================================
 double OrderBook::getSpread() {
-    return (bestAsk - bestBid);
+    return (getMinAsk().price - getMaxBid().price);
 }
