@@ -132,16 +132,8 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
 
 /*
  * TODO Logic: 
- * Buy limits follow specific logic flow: 
- * 
- * If there exists sell limit orders with prices below the buy limit price, 
- *   - Execute at the cheapest sell limit price (repeatedly until satisfied)
- *     - If there exist multiple cheapest sell limit prices, execute them in chronological order (better heap sorting methods required)
- *   - If all sell limits below buy price have been executed and order is still not fulfilled, store onto buyLimitHeap
- * 
- * Else,
- *   - Store buy limit order onto buyLimitHeap
- * 
+ *  
+ * If there exist multiple cheapest sell limit prices, execute them in chronological order (better heap sorting methods required)
  */
 
 string OrderBook::buyLimitOrder(orderStruct oS) {
