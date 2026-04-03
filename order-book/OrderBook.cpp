@@ -68,6 +68,7 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
     while (bestAsk.id != -1) {
         int bestShares = bestAsk.shares;
         double bestPrice = bestAsk.price;
+        lastTradedPrice = bestPrice;
         int addedShares = min(reqShares - filledShares, bestShares);
 
         if (addedShares == bestShares) {
@@ -107,6 +108,7 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
     while (bestBid.id != -1) {
         int bestShares = bestBid.shares;
         double bestPrice = bestBid.price;
+        lastTradedPrice = bestPrice;
         int addedShares = min(reqShares - filledShares, bestShares);
 
         if (addedShares == bestShares) {
@@ -144,6 +146,7 @@ string OrderBook::buyLimitOrder(orderStruct oS) {
     double totalCost = 0.0;
     orderStruct cheapestAsk = getMinAsk();
     while (cheapestAsk.id != -1 && cheapestAsk.price <= oS.price) {
+        lastTradedPrice = cheapestAsk.price;
         if (cheapestAsk.shares + filledShares <= oS.shares) {
             totalCost += (cheapestAsk.shares * cheapestAsk.price);
             filledShares += cheapestAsk.shares;
@@ -199,6 +202,7 @@ string OrderBook::sellLimitOrder(orderStruct oS) {
     orderStruct expensiveBid = getMaxBid();
 
     while (expensiveBid.id != -1 && expensiveBid.price >= oS.price) {
+        lastTradedPrice = expensiveBid.price;
         if (filledShares + expensiveBid.shares <= oS.shares) {
             totalProfit += (expensiveBid.shares * expensiveBid.price);
             filledShares += expensiveBid.shares;
@@ -358,4 +362,8 @@ void OrderBook::removeBid(int heapLoc) {
 // ====================================================================================================================================
 double OrderBook::getSpread() {
     return (getMinAsk().price - getMaxBid().price);
+}
+
+double OrderBook::getLastTradedPrice() {
+    return (lastTradedPrice);
 }
