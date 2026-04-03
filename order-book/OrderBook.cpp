@@ -42,6 +42,7 @@ string OrderBook::cancelOrder(int id) {
     // Prolly need to change .count to some other detect->exit feature (possible waste of time here)
     if (processedOrders.count(id)) {
         cout << "CANCELLATION FAILED ORDER " << id << " ALREADY EXECUTED" << endl;
+        return ("");
     } 
 
     if (buyOrders.count(id)) {
@@ -57,6 +58,7 @@ string OrderBook::cancelOrder(int id) {
 
 
 string OrderBook::buyMarketOrder(orderStruct oS) {
+    processedOrders[oS.id] = oS;
     int filledShares = 0;
     int reqShares = oS.shares;
     double totalCost = 0.0;
@@ -67,6 +69,11 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
         int bestShares = bestAsk.shares;
         double bestPrice = bestAsk.price;
         int addedShares = min(reqShares - filledShares, bestShares);
+
+        if (addedShares == bestShares) {
+            processedOrders[bestAsk.id] = bestAsk;
+        }
+
         filledShares += addedShares;
         totalCost += (addedShares * bestPrice);
         removeAsk(0);
@@ -85,16 +92,12 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
     double averageCost = totalCost / filledShares;
     string output = "FILLED " + to_string(filledShares) + " SHARES AT AN AVERAGE COST OF $" + to_string(averageCost);
     cout << output << endl;
-    
-    if (filledShares < reqShares) {
-        return ("PARTIAL");
-    }
-
-    return ("FILLED");
+    return ("");
 }
 
 
 string OrderBook::sellMarketOrder(orderStruct oS) {
+    processedOrders[oS.id] = oS;
     int filledShares = 0;
     int reqShares = oS.shares;
     double totalGain = 0.0;
@@ -105,6 +108,11 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
         int bestShares = bestBid.shares;
         double bestPrice = bestBid.price;
         int addedShares = min(reqShares - filledShares, bestShares);
+
+        if (addedShares == bestShares) {
+            processedOrders[bestBid.id] = bestBid;
+        }
+
         filledShares += addedShares;
         totalGain += (addedShares * bestPrice);
         removeBid(0);
@@ -122,12 +130,7 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
 
     string output = "SOLD " + to_string(filledShares) + " shares for a total gain of $" + to_string(totalGain);
     cout << output << endl;
-    
-    if (filledShares < reqShares) {
-        return ("PARTIAL");
-    }
-
-    return ("FILLED");
+    return ("");
 }
 
 /*
@@ -169,6 +172,7 @@ string OrderBook::buyLimitOrder(orderStruct oS) {
 
     if (filledShares == oS.shares) {
         cout << "Buy limit order " << oS.id << " has fully filled (" << filledShares << " shares at an average cost of $" << avgCost << ")" << endl;
+        processedOrders[oS.id] = oS;
     }
     else if (filledShares > 0) {
         cout << "Buy limit order " << oS.id << " has partially filled (" << filledShares << " shares at an average cost of $" << avgCost << ")" << endl;
@@ -223,6 +227,7 @@ string OrderBook::sellLimitOrder(orderStruct oS) {
 
     if (filledShares == oS.shares) {
         cout << "Sell limit order " << oS.id << " has fully filled (" << filledShares << " shares at an average price of $" << avgProfit << ")" << endl;
+        processedOrders[oS.id] = oS;
     }
     else if (filledShares > 0) {
         cout << "Sell limit order " << oS.id << " has partially filled (" << filledShares << " shares at an average price of $" << avgProfit << ")" << endl;
