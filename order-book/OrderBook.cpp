@@ -140,7 +140,7 @@ string OrderBook::buyLimitOrder(orderStruct oS) {
     int filledShares = 0;
     double totalCost = 0.0;
     orderStruct cheapestAsk = getMinAsk();
-    while (cheapestAsk.price <= oS.price) {
+    while (cheapestAsk.id != -1 && cheapestAsk.price <= oS.price) {
         if (cheapestAsk.shares + filledShares <= oS.shares) {
             totalCost += (cheapestAsk.shares * cheapestAsk.price);
             filledShares += cheapestAsk.shares;
@@ -186,21 +186,55 @@ string OrderBook::buyLimitOrder(orderStruct oS) {
 
 /*
  * TODO Logic: 
- * Sell limits follow specific logic flow: 
- * 
- * If there exists buy limit orders with prices above the sell limit price, 
- *   - Execute at the most expensive buy limit price (repeatedly until satisfied)
- *     - If there exist multiple expensive buy limit prices, execute them in chronological order (better heap sorting methods required)
- *   - If all buy limits above buy price have been executed and order is still not fulfilled, store onto sellLimitHeap
- * 
- * Else,
- *   - Store sell limit order onto sellLimitHeap
- * 
+ *  
+ * If there exist multiple most expensive buy limit orders, execute them in chronological order (better heap sorting methods required)
  */
 string OrderBook::sellLimitOrder(orderStruct oS) {
-    sellLimitInsert(oS);
-    cout << "SELL INSERTED" << endl;
-    return ("Inserted");
+    int filledShares = 0;
+    double totalProfit = 0.0;
+    orderStruct expensiveBid = getMaxBid();
+
+    while (expensiveBid.id != -1 && expensiveBid.price >= oS.price) {
+        if (filledShares + expensiveBid.shares <= oS.shares) {
+            totalProfit += (expensiveBid.shares * expensiveBid.price);
+            filledShares += expensiveBid.shares;
+            processedOrders[expensiveBid.id] = expensiveBid;
+
+            cout << "Buy limit order " << expensiveBid.id << " has been fully filled (" << expensiveBid.shares << " shares at an average price of $" << expensiveBid.price << ")" << endl;
+            removeBid(0);
+            expensiveBid = getMaxBid();
+        }
+        else {
+            int adding = oS.shares - filledShares;
+            totalProfit += (adding * expensiveBid.price);
+            filledShares = oS.shares;
+            
+            orderStruct insertingOrder = expensiveBid;
+            insertingOrder.shares -= adding;
+
+            cout << "Buy limit order " << expensiveBid.id << " has been partially filled (" << adding << " shares at an average price of $" << expensiveBid.price << ")" << endl;
+            removeBid(0);
+            buyLimitInsert(insertingOrder);
+            break;
+        }
+    }
+
+    double avgProfit = totalProfit / filledShares;
+
+    if (filledShares == oS.shares) {
+        cout << "Sell limit order " << oS.id << " has fully filled (" << filledShares << " shares at an average price of $" << avgProfit << ")" << endl;
+    }
+    else if (filledShares > 0) {
+        cout << "Sell limit order " << oS.id << " has partially filled (" << filledShares << " shares at an average price of $" << avgProfit << ")" << endl;
+        oS.shares -= filledShares;
+        sellLimitInsert(oS);
+        cout << "Sell limit order " << oS.id << " inserted with " << oS.shares << " shares waiting to be sold at price $" << oS.price << " or better" << endl;
+    }
+    else {
+        cout << "Sell limit order " << oS.id << " inserted with " << oS.shares << " shares waiting to be sold at price $" << oS.price << " or better" << endl;
+        sellLimitInsert(oS);
+    }
+    return ("");
 }
 
 
