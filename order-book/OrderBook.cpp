@@ -90,6 +90,11 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
         bestAsk = getMinAsk();
     }
 
+    if (filledShares == 0) {
+        cout << "Buy market order " << oS.id << " failed with 0 shares filled" << endl;
+        return ("");
+    }
+
     double averageCost = totalCost / filledShares;
     string output = "FILLED " + to_string(filledShares) + " SHARES AT AN AVERAGE COST OF $" + to_string(averageCost);
     cout << output << endl;
@@ -171,13 +176,13 @@ string OrderBook::buyLimitOrder(orderStruct oS) {
         } 
     }
 
-    double avgCost = totalCost / filledShares;
-
     if (filledShares == oS.shares) {
+        double avgCost = totalCost / filledShares;
         cout << "Buy limit order " << oS.id << " has fully filled (" << filledShares << " shares at an average cost of $" << avgCost << ")" << endl;
         processedOrders[oS.id] = oS;
     }
     else if (filledShares > 0) {
+        double avgCost = totalCost / filledShares;
         cout << "Buy limit order " << oS.id << " has partially filled (" << filledShares << " shares at an average cost of $" << avgCost << ")" << endl;
         oS.shares -= filledShares;
         buyLimitInsert(oS);
@@ -227,13 +232,13 @@ string OrderBook::sellLimitOrder(orderStruct oS) {
         }
     }
 
-    double avgProfit = totalProfit / filledShares;
-
     if (filledShares == oS.shares) {
+        double avgProfit = totalProfit / filledShares;
         cout << "Sell limit order " << oS.id << " has fully filled (" << filledShares << " shares at an average price of $" << avgProfit << ")" << endl;
         processedOrders[oS.id] = oS;
     }
     else if (filledShares > 0) {
+        double avgProfit = totalProfit / filledShares;
         cout << "Sell limit order " << oS.id << " has partially filled (" << filledShares << " shares at an average price of $" << avgProfit << ")" << endl;
         oS.shares -= filledShares;
         sellLimitInsert(oS);
