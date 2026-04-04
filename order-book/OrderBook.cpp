@@ -302,6 +302,12 @@ orderStruct OrderBook::getMaxBid() {
 
 void OrderBook::removeAsk(int heapLoc) {
     sellLimitSize--;
+
+    orderStruct heapLocoS = sellLimitHeap[heapLoc];
+    orderStruct sLSoS = sellLimitHeap[sellLimitSize];
+    sellHeapMap[sLSoS.id] = heapLoc;
+    sellHeapMap[heapLocoS.id] = -1;
+
     sellLimitHeap[heapLoc] = sellLimitHeap[sellLimitSize];
     sellLimitHeap[sellLimitSize].id = -1;
 
@@ -324,6 +330,11 @@ void OrderBook::removeAsk(int heapLoc) {
             break;
         }
 
+        orderStruct curoS = sellLimitHeap[cur];
+        orderStruct smallestoS = sellLimitHeap[smallest];
+        sellHeapMap[curoS.id] = smallest;
+        sellHeapMap[smallestoS.id] = cur;
+
         swap(sellLimitHeap[cur], sellLimitHeap[smallest]);
         cur = smallest;
     }
@@ -331,6 +342,12 @@ void OrderBook::removeAsk(int heapLoc) {
 
 void OrderBook::removeBid(int heapLoc) {
     buyLimitSize--;
+
+    orderStruct heapLocoS = buyLimitHeap[heapLoc];
+    orderStruct bLSoS = buyLimitHeap[buyLimitSize];
+    buyHeapMap[bLSoS.id] = heapLoc;
+    buyHeapMap[heapLocoS.id] = -1;
+
     buyLimitHeap[heapLoc] = buyLimitHeap[buyLimitSize];
     buyLimitHeap[buyLimitSize].id = -1;
 
@@ -352,6 +369,11 @@ void OrderBook::removeBid(int heapLoc) {
         if (largest == cur) {
             break;
         }
+
+        orderStruct curoS = buyLimitHeap[cur];
+        orderStruct largestoS = buyLimitHeap[largest];
+        buyHeapMap[largestoS.id] = cur;
+        buyHeapMap[curoS.id] = largest;
 
         swap(buyLimitHeap[cur], buyLimitHeap[largest]);
         cur = largest;
