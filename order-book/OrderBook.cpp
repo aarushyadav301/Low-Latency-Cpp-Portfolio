@@ -12,6 +12,8 @@ OrderBook::OrderBook() {}
 
 // Public Interface
 string OrderBook::processOrder(orderStruct oS) {
+    //cout << "INCOMING ORDER " << oS.id << " " << oS.action << " " << oS.type << " " << oS.shares << " at " << oS.price << endl;
+
     if (oS.action == "CANCEL") {
         return (cancelOrder(oS.id));
     }
@@ -36,12 +38,30 @@ string OrderBook::processOrder(orderStruct oS) {
     }
 }
 
+void OrderBook::reset() {
+    pendingOrders.clear();
+    processedOrders.clear();
+    buyOrders.clear();
+
+    sellHeapMap.clear();
+    sellHeapMap.resize(10005);
+    buyHeapMap.clear();
+    buyHeapMap.resize(10005);
+    
+    sellLimitHeap.clear();
+    sellLimitHeap.resize(10005);
+    buyLimitHeap.clear();
+    buyLimitHeap.resize(10005);
+    sellLimitSize = 0;
+    buyLimitSize = 0;
+}
+
 // Matching Engine Methods
 // ====================================================================================================================================
 string OrderBook::cancelOrder(int id) {
     // Prolly need to change .count to some other detect->exit feature (possible waste of time here)
     if (processedOrders.count(id)) {
-        cout << "CANCELLATION FAILED ORDER " << id << " ALREADY EXECUTED" << endl;
+        //cout << "CANCELLATION FAILED ORDER " << id << " ALREADY EXECUTED" << endl;
         return ("");
     } 
 
@@ -52,7 +72,7 @@ string OrderBook::cancelOrder(int id) {
         removeAsk(sellHeapMap[id]);
     }
 
-    cout << "SUCCESSFUL CANCELLATION OF ORDER " << id << endl;
+    //cout << "SUCCESSFUL CANCELLATION OF ORDER " << id << endl;
     return ("");
 }
 
@@ -91,13 +111,13 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
     }
 
     if (filledShares == 0) {
-        cout << "Buy market order " << oS.id << " failed with 0 shares filled" << endl;
+        //cout << "Buy market order " << oS.id << " failed with 0 shares filled" << endl;
         return ("");
     }
 
     double averageCost = totalCost / filledShares;
     string output = "FILLED " + to_string(filledShares) + " SHARES AT AN AVERAGE COST OF $" + to_string(averageCost);
-    cout << output << endl;
+    //cout << output << endl;
     return ("");
 }
 
@@ -136,7 +156,7 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
     }
 
     string output = "SOLD " + to_string(filledShares) + " shares for a total gain of $" + to_string(totalGain);
-    cout << output << endl;
+    ////cout << output << endl;
     return ("");
 }
 
@@ -157,7 +177,7 @@ string OrderBook::buyLimitOrder(orderStruct oS) {
             filledShares += cheapestAsk.shares;
             processedOrders[cheapestAsk.id] = cheapestAsk;
 
-            cout << "Sell limit order " << cheapestAsk.id << " has been fully filled (" << cheapestAsk.shares << " shares at an average price of $" << cheapestAsk.price << ")" << endl;
+            ////cout << "Sell limit order " << cheapestAsk.id << " has been fully filled (" << cheapestAsk.shares << " shares at an average price of $" << cheapestAsk.price << ")" << endl;
             removeAsk(0);
             cheapestAsk = getMinAsk();
         }
@@ -169,7 +189,7 @@ string OrderBook::buyLimitOrder(orderStruct oS) {
             orderStruct insertingOrder = cheapestAsk;
             insertingOrder.shares -= adding;
 
-            cout << "Sell limit order " << cheapestAsk.id << " has been partially filled (" << adding << " shares at an average price of $" << cheapestAsk.price << ")" << endl;
+            ////cout << "Sell limit order " << cheapestAsk.id << " has been partially filled (" << adding << " shares at an average price of $" << cheapestAsk.price << ")" << endl;
             removeAsk(0);
             sellLimitInsert(insertingOrder);
             break;
@@ -178,18 +198,18 @@ string OrderBook::buyLimitOrder(orderStruct oS) {
 
     if (filledShares == oS.shares) {
         double avgCost = totalCost / filledShares;
-        cout << "Buy limit order " << oS.id << " has fully filled (" << filledShares << " shares at an average cost of $" << avgCost << ")" << endl;
+        ////cout << "Buy limit order " << oS.id << " has fully filled (" << filledShares << " shares at an average cost of $" << avgCost << ")" << endl;
         processedOrders[oS.id] = oS;
     }
     else if (filledShares > 0) {
         double avgCost = totalCost / filledShares;
-        cout << "Buy limit order " << oS.id << " has partially filled (" << filledShares << " shares at an average cost of $" << avgCost << ")" << endl;
+        ////cout << "Buy limit order " << oS.id << " has partially filled (" << filledShares << " shares at an average cost of $" << avgCost << ")" << endl;
         oS.shares -= filledShares;
         buyLimitInsert(oS);
-        cout << "Buy limit order " << oS.id << " inserted with " << oS.shares << " shares waiting to be bought at price $" << oS.price << " or better" << endl;
+        ////cout << "Buy limit order " << oS.id << " inserted with " << oS.shares << " shares waiting to be bought at price $" << oS.price << " or better" << endl;
     }
     else {
-        cout << "Buy limit order " << oS.id << " inserted with " << oS.shares << " shares waiting to be bought at price $" << oS.price << " or better" << endl;
+        ////cout << "Buy limit order " << oS.id << " inserted with " << oS.shares << " shares waiting to be bought at price $" << oS.price << " or better" << endl;
         buyLimitInsert(oS);
     }
     return("");
@@ -213,7 +233,7 @@ string OrderBook::sellLimitOrder(orderStruct oS) {
             filledShares += expensiveBid.shares;
             processedOrders[expensiveBid.id] = expensiveBid;
 
-            cout << "Buy limit order " << expensiveBid.id << " has been fully filled (" << expensiveBid.shares << " shares at an average price of $" << expensiveBid.price << ")" << endl;
+            //cout << "Buy limit order " << expensiveBid.id << " has been fully filled (" << expensiveBid.shares << " shares at an average price of $" << expensiveBid.price << ")" << endl;
             removeBid(0);
             expensiveBid = getMaxBid();
         }
@@ -225,7 +245,7 @@ string OrderBook::sellLimitOrder(orderStruct oS) {
             orderStruct insertingOrder = expensiveBid;
             insertingOrder.shares -= adding;
 
-            cout << "Buy limit order " << expensiveBid.id << " has been partially filled (" << adding << " shares at an average price of $" << expensiveBid.price << ")" << endl;
+            //cout << "Buy limit order " << expensiveBid.id << " has been partially filled (" << adding << " shares at an average price of $" << expensiveBid.price << ")" << endl;
             removeBid(0);
             buyLimitInsert(insertingOrder);
             break;
@@ -234,18 +254,18 @@ string OrderBook::sellLimitOrder(orderStruct oS) {
 
     if (filledShares == oS.shares) {
         double avgProfit = totalProfit / filledShares;
-        cout << "Sell limit order " << oS.id << " has fully filled (" << filledShares << " shares at an average price of $" << avgProfit << ")" << endl;
+        //cout << "Sell limit order " << oS.id << " has fully filled (" << filledShares << " shares at an average price of $" << avgProfit << ")" << endl;
         processedOrders[oS.id] = oS;
     }
     else if (filledShares > 0) {
         double avgProfit = totalProfit / filledShares;
-        cout << "Sell limit order " << oS.id << " has partially filled (" << filledShares << " shares at an average price of $" << avgProfit << ")" << endl;
+        //cout << "Sell limit order " << oS.id << " has partially filled (" << filledShares << " shares at an average price of $" << avgProfit << ")" << endl;
         oS.shares -= filledShares;
         sellLimitInsert(oS);
-        cout << "Sell limit order " << oS.id << " inserted with " << oS.shares << " shares waiting to be sold at price $" << oS.price << " or better" << endl;
+        ////cout << "Sell limit order " << oS.id << " inserted with " << oS.shares << " shares waiting to be sold at price $" << oS.price << " or better" << endl;
     }
     else {
-        cout << "Sell limit order " << oS.id << " inserted with " << oS.shares << " shares waiting to be sold at price $" << oS.price << " or better" << endl;
+        ////cout << "Sell limit order " << oS.id << " inserted with " << oS.shares << " shares waiting to be sold at price $" << oS.price << " or better" << endl;
         sellLimitInsert(oS);
     }
     return ("");
@@ -264,7 +284,7 @@ void OrderBook::sellLimitInsert(orderStruct oS) {
     sellLimitHeap[sellLimitSize] = oS;
     sellHeapMap[oS.id] = sellLimitSize++;
 
-    cout << "order struct " << oS.id << " inserted in sell heap at " << sellHeapMap[oS.id] << endl;
+    ////cout << "order struct " << oS.id << " inserted in sell heap at " << sellHeapMap[oS.id] << endl;
 
     while (cur != 0 && sellLimitHeap[findHeapParent(cur)].price > sellLimitHeap[cur].price) {
         orderStruct pS = sellLimitHeap[findHeapParent(cur)];
@@ -273,8 +293,8 @@ void OrderBook::sellLimitInsert(orderStruct oS) {
         swap(sellLimitHeap[findHeapParent(cur)], sellLimitHeap[cur]);
         cur = findHeapParent(cur);
 
-        cout << "order struct " << pS.id << " swapped to " << sellHeapMap[pS.id] << endl;
-        cout << "order struct " << oS.id << " swapped to " << sellHeapMap[oS.id] << endl;
+        ////cout << "order struct " << pS.id << " swapped to " << sellHeapMap[pS.id] << endl;
+        ////cout << "order struct " << oS.id << " swapped to " << sellHeapMap[oS.id] << endl;
     }
 }
 
@@ -283,7 +303,7 @@ void OrderBook::buyLimitInsert(orderStruct oS) {
     buyLimitHeap[buyLimitSize] = oS;
     buyHeapMap[oS.id] = buyLimitSize++;
 
-    cout << "order struct " << oS.id << " inserted in buy heap at " << buyHeapMap[oS.id] << endl;
+    ////cout << "order struct " << oS.id << " inserted in buy heap at " << buyHeapMap[oS.id] << endl;
 
     while (cur != 0 && buyLimitHeap[findHeapParent(cur)].price < buyLimitHeap[cur].price) {
         orderStruct pS = buyLimitHeap[findHeapParent(cur)];
@@ -292,8 +312,8 @@ void OrderBook::buyLimitInsert(orderStruct oS) {
         swap(buyLimitHeap[findHeapParent(cur)], buyLimitHeap[cur]);
         cur = findHeapParent(cur);
 
-        cout << "order struct " << pS.id << " swapped to " << buyHeapMap[pS.id] << endl;
-        cout << "order struct " << oS.id << " swapped to " << buyHeapMap[oS.id] << endl;
+        ////cout << "order struct " << pS.id << " swapped to " << buyHeapMap[pS.id] << endl;
+        ////cout << "order struct " << oS.id << " swapped to " << buyHeapMap[oS.id] << endl;
     }
 }
 
@@ -393,4 +413,8 @@ double OrderBook::getSpread() {
 
 double OrderBook::getLastTradedPrice() {
     return (lastTradedPrice);
+}
+
+int OrderBook::getSize() {
+    return (buyLimitSize + sellLimitSize);
 }

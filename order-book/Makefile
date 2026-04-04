@@ -1,7 +1,7 @@
 .PHONY: clean
 
 clean: 
-	rm *.o
+	rm *.o *.txt
 
 benchmark: benchmark.cpp OrderBook.cpp OrderBook.hpp Queue.cpp Queue.hpp
 	g++ -O3 \

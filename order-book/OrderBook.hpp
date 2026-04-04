@@ -16,10 +16,12 @@ namespace Order {
         public:
             OrderBook();
             string processOrder(orderStruct oS);
+            void reset();
     
             // Market info methods
             double getSpread();
             double getLastTradedPrice();
+            int getSize();
     
         private:
             /* 
@@ -38,8 +40,8 @@ namespace Order {
             unordered_set<int> buyOrders;
     
             // Index (Id) -> Heap location
-            vector<int> sellHeapMap{1000};
-            vector<int> buyHeapMap{1000};
+            vector<int> sellHeapMap{10005};
+            vector<int> buyHeapMap{10005};
 
             string cancelOrder(int id);
     
@@ -63,8 +65,8 @@ namespace Order {
              * 
              */ 
             
-            vector <orderStruct> sellLimitHeap{1000};
-            vector <orderStruct> buyLimitHeap{1000};
+            vector <orderStruct> sellLimitHeap{10005};
+            vector <orderStruct> buyLimitHeap{10005};
             int sellLimitSize = 0;
             int buyLimitSize = 0;
     
