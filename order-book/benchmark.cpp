@@ -21,15 +21,15 @@ void BM_shallowLatency(benchmark::State& state) {
             uniform_int_distribution<int> actDistr(0, 1);
 
             int numAction = actDistr(generator);
-            string action;
+            orderAction action;
             if (numAction == 0) {
-                action = "BUY";
+                action = BUY;
             }
             else {
-                action = "SELL";
+                action = SELL;
             }
 
-            string type = "LIMIT";
+            orderType type = LIMIT;
 
             uniform_int_distribution<int> sharesDistr(1, 20);
             int numShares = sharesDistr(generator);
@@ -52,28 +52,28 @@ void BM_shallowLatency(benchmark::State& state) {
         uniform_int_distribution<int> actDistr(1, 5);
         int act = actDistr(generator);
         
-        string action;
-        string type = "";
+        orderAction action;
+        orderType type = LIMIT;
 
         switch (act) {
             case 1:
-                action = "BUY";
-                type = "LIMIT";
+                action = BUY;
+                type = LIMIT;
                 break;
             case 2:
-                action = "SELL";
-                type = "LIMIT";
+                action = SELL;
+                type = LIMIT;
                 break;
             case 3:
-                action = "BUY";
-                type = "MARKET";
+                action = BUY;
+                type = MARKET;
                 break;
             case 4:
-                action = "SELL";
-                type = "MARKET";
+                action = SELL;
+                type = MARKET;
                 break;
             case 5:
-                action = "CANCEL";
+                action = CANCEL;
         }
 
         uniform_int_distribution<int> sharesDistr(1, 20);
@@ -81,19 +81,19 @@ void BM_shallowLatency(benchmark::State& state) {
 
         double price = 0.0;
 
-        if (action == "BUY") {
+        if (action == BUY) {
             normal_distribution<double> buyDistr(10.0, 4.0);
             price = buyDistr(generator);
         }
-        else if (action == "SELL") {
+        else if (action == SELL) {
             normal_distribution<double> sellDistr(20.0, 4.0);
             price = sellDistr(generator);
         }
 
         orderStruct oS;
 
-        if (action == "CANCEL") {
-            oS.action = "CANCEL";
+        if (action == CANCEL) {
+            oS.action = CANCEL;
 
             uniform_int_distribution<int> cancelDistr(1, id);
             oS.id = cancelDistr(generator);

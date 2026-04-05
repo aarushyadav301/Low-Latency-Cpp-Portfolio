@@ -6,12 +6,21 @@
 using namespace std;
 
 namespace Queue {
+    enum orderAction {
+        BUY,
+        SELL,
+        CANCEL
+    };
 
+    enum orderType {
+        LIMIT, 
+        MARKET
+    };
 
     // orderStruct
     struct orderStruct {
-        string action;
-        string type;
+        orderAction action;
+        orderType type;
         int shares;
         double price;
         int id;
@@ -20,7 +29,7 @@ namespace Queue {
             id = -1;
         }
 
-        orderStruct (string a, string t, int s, double p, int i) {
+        orderStruct (orderAction a, orderType t, int s, double p, int i) {
             action = a;
             type = t;
             shares = s;

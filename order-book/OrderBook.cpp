@@ -14,12 +14,12 @@ OrderBook::OrderBook() {}
 string OrderBook::processOrder(orderStruct oS) {
     //cout << "INCOMING ORDER " << oS.id << " " << oS.action << " " << oS.type << " " << oS.shares << " at " << oS.price << endl;
 
-    if (oS.action == "CANCEL") {
+    if (oS.action == 2) {
         return (cancelOrder(oS.id));
     }
     else {
-        if (oS.action == "BUY") {
-            if (oS.type == "MARKET") {
+        if (oS.action == 0) {
+            if (oS.type == 1) {
                 return (buyMarketOrder(oS));
             }
             else {
@@ -28,7 +28,7 @@ string OrderBook::processOrder(orderStruct oS) {
             }
         }
         else {
-            if (oS.type == "MARKET") {
+            if (oS.type == 1) {
                 return (sellMarketOrder(oS));
             }
             else {
@@ -101,7 +101,7 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
 
         if (filledShares == reqShares) {
             if (bestShares - addedShares) {
-                orderStruct adding("SELL", "LIMIT", bestShares - addedShares, bestPrice, bestAsk.id);
+                orderStruct adding(SELL, LIMIT, bestShares - addedShares, bestPrice, bestAsk.id);
                 sellLimitInsert(adding);
             }
             break;
@@ -146,7 +146,7 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
 
         if (filledShares == reqShares) {
             if (bestShares - addedShares) {
-                orderStruct adding("SELL", "LIMIT", bestShares - addedShares, bestPrice, bestBid.id);
+                orderStruct adding(SELL, LIMIT, bestShares - addedShares, bestPrice, bestBid.id);
                 sellLimitInsert(adding);
             }
             break;
