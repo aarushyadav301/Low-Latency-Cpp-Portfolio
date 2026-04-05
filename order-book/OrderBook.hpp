@@ -19,8 +19,8 @@ namespace Order {
             void reset();
     
             // Market info methods
-            double getSpread();
-            double getLastTradedPrice();
+            int getSpread();
+            int getLastTradedPrice();
             int getSize();
     
         private:
@@ -82,7 +82,7 @@ namespace Order {
             void removeAsk(int heapLoc);
             void removeBid(int heapLoc);
 
-            double lastTradedPrice;
+            int lastTradedPrice;
     };    
 }
 

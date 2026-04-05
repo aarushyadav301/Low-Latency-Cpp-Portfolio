@@ -22,14 +22,14 @@ namespace Queue {
         orderAction action;
         orderType type;
         int shares;
-        double price;
+        int price;
         int id;
 
         orderStruct () {
             id = -1;
         }
 
-        orderStruct (orderAction a, orderType t, int s, double p, int i) {
+        orderStruct (orderAction a, orderType t, int s, int p, int i) {
             action = a;
             type = t;
             shares = s;

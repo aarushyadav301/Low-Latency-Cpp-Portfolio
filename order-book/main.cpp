@@ -38,7 +38,8 @@ int main() {
             }
 
             int shares = stoi(nums.substr(0, nums.find_first_of(" ")));
-            double price = stod(nums.substr(nums.find_first_of("$") + 1, len));
+            double priceD = stod(nums.substr(nums.find_first_of("$") + 1, len));
+            int price = (int)(priceD * 100);
 
             order.shares = shares;
             order.price = price;
@@ -57,7 +58,9 @@ int main() {
             }
 
             int shares = stoi(nums.substr(0, nums.find_first_of(" ")));
-            double price = stod(nums.substr(nums.find_first_of("$") + 1, len));
+            double priceD = stod(nums.substr(nums.find_first_of("$") + 1, len));
+            int price = (int)(priceD * 100);
+
             order.shares = shares;
             order.price = price;
         }
@@ -72,7 +75,7 @@ int main() {
         }
 
         if (order.type == MARKET) {
-            order.price = 0.0;
+            order.price = 0;
         }
 
         order.id = id;
