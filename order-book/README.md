@@ -48,8 +48,8 @@ The engine processes five order types through a unified `processOrder()` interfa
 
 **Order Tracking**
 
-- `buyOrders` — unordered_set of IDs tracking which resting orders are on the bid side, used by `cancelOrder` to route to the correct heap without storing redundant side information on the struct itself.
-- `processedOrders` — tracks fully filled orders so cancel requests on completed orders fail fast with O(1) detection.
+- `buyOrders` -> unordered_set of IDs tracking which resting orders are on the bid side, used by `cancelOrder` to route to the correct heap without storing redundant side information on the struct itself.
+- `processedOrders` -> tracks fully filled orders so cancel requests on completed orders fail fast with O(1) detection.
 
 ---
 
@@ -83,11 +83,11 @@ Market orders consume the book greedily from the inside out. On each iteration t
 
 ## Hot Path Optimizations
 
-**Enum action and type fields** —> Replaced all std::string action and type fields with strongly typed enums. This eliminates heap allocation and character-by-character string comparison on every order processed. Result: ~13% latency reduction (experimentally-determined)
+**Enum action and type fields** -> Replaced all std::string action and type fields with strongly typed enums. This eliminates heap allocation and character-by-character string comparison on every order processed. Result: ~13% latency reduction (experimentally-determined)
 
-**Integer cent prices** —> Prices stored internally as int cents (e.g. $142.50 is stored as 14250). This eliminates floating point arithmetic on the hot path. Integer arithmetic executes in a single cycle versus 3–5 cycles for floating point. The input parser handles dollar-to-cent conversion transparently so the user interface remains in dollars. Result: ~21% additional latency reduction, variance tightened from ±40ns to ±3ns (experimentally-determined). 
+**Integer cent prices** -> Prices stored internally as int cents (e.g. $142.50 is stored as 14250). This eliminates floating point arithmetic on the hot path. Integer arithmetic executes in a single cycle versus 3–5 cycles for floating point. The input parser handles dollar-to-cent conversion transparently so the user interface remains in dollars. Result: ~21% additional latency reduction, variance tightened from ±40ns to ±3ns (experimentally-determined). 
 
-**Pre-allocated heap storage** —> Both heaps and position maps are sized at construction. No dynamic memory allocation occurs during order processing.
+**Pre-allocated heap storage** -> Both heaps and position maps are sized at construction. No dynamic memory allocation occurs during order processing.
 
 ---
 
@@ -98,7 +98,7 @@ cd order-book
 make program        # builds the interactive program
 make benchmark      # builds the benchmark runner
 ./program           # run interactively
-./benchmark_runner  # run benchmarks
+./benchmark_runner >> benchmarks.txt  # run benchmarks and append output to some txt file (optional)
 ```
 
 **Input format:**
