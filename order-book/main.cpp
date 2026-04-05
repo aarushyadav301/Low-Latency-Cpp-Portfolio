@@ -8,7 +8,6 @@ using namespace Queue;
 using namespace Order;
 
 int main() {
-
     OrderBook oB;
     int id = 1;
 
@@ -39,7 +38,7 @@ int main() {
 
             int shares = stoi(nums.substr(0, nums.find_first_of(" ")));
             double priceD = stod(nums.substr(nums.find_first_of("$") + 1, len));
-            int price = (int)(priceD * 100);
+            int price = (int)(priceD * 100 + 0.5);
 
             order.shares = shares;
             order.price = price;
@@ -59,7 +58,7 @@ int main() {
 
             int shares = stoi(nums.substr(0, nums.find_first_of(" ")));
             double priceD = stod(nums.substr(nums.find_first_of("$") + 1, len));
-            int price = (int)(priceD * 100);
+            int price = (int)(priceD * 100 + 0.5);
 
             order.shares = shares;
             order.price = price;
