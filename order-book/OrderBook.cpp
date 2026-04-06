@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <algorithm>
 
 using namespace Order;
 using namespace std;
@@ -23,7 +24,7 @@ string OrderBook::processOrder(orderStruct oS) {
                 return (buyMarketOrder(oS));
             }
             else {
-                buyOrders.insert(oS.id);
+                buyOrders[oS.id] = true;
                 return (buyLimitOrder(oS));
             }
         }
@@ -39,19 +40,12 @@ string OrderBook::processOrder(orderStruct oS) {
 }
 
 void OrderBook::reset() {
-    pendingOrders.clear();
-    processedOrders.clear();
-    buyOrders.clear();
+    fill(pendingOrders.begin(), pendingOrders.end(), false);
+    fill(processedOrders.begin(), processedOrders.end(), false);
+    fill(buyOrders.begin(), buyOrders.end(), false);
 
-    sellHeapMap.clear();
-    sellHeapMap.resize(10005);
-    buyHeapMap.clear();
-    buyHeapMap.resize(10005);
-    
-    sellLimitHeap.clear();
-    sellLimitHeap.resize(10005);
-    buyLimitHeap.clear();
-    buyLimitHeap.resize(10005);
+    sellLimitHeap[0].id = -1;
+    buyLimitHeap[0].id = -1;
     sellLimitSize = 0;
     buyLimitSize = 0;
 }
@@ -60,12 +54,12 @@ void OrderBook::reset() {
 // ====================================================================================================================================
 string OrderBook::cancelOrder(int id) {
     // Prolly need to change .count to some other detect->exit feature (possible waste of time here)
-    if (processedOrders.count(id)) {
+    if (processedOrders[id]) {
         //cout << "CANCELLATION FAILED ORDER " << id << " ALREADY EXECUTED" << endl;
         return ("");
     } 
 
-    if (buyOrders.count(id)) {
+    if (buyOrders[id]) {
         removeBid(buyHeapMap[id]);
     }
     else {
@@ -78,7 +72,7 @@ string OrderBook::cancelOrder(int id) {
 
 
 string OrderBook::buyMarketOrder(orderStruct oS) {
-    processedOrders[oS.id] = oS;
+    processedOrders[oS.id] = true;
     int filledShares = 0;
     int reqShares = oS.shares;
     int totalCost = 0;
@@ -92,7 +86,7 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
         int addedShares = min(reqShares - filledShares, bestShares);
 
         if (addedShares == bestShares) {
-            processedOrders[bestAsk.id] = bestAsk;
+            processedOrders[bestAsk.id] = true;
         }
 
         filledShares += addedShares;
@@ -123,7 +117,7 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
 
 
 string OrderBook::sellMarketOrder(orderStruct oS) {
-    processedOrders[oS.id] = oS;
+    processedOrders[oS.id] = true;
     int filledShares = 0;
     int reqShares = oS.shares;
     int totalGain = 0;
@@ -137,7 +131,7 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
         int addedShares = min(reqShares - filledShares, bestShares);
 
         if (addedShares == bestShares) {
-            processedOrders[bestBid.id] = bestBid;
+            processedOrders[bestBid.id] = true;
         }
 
         filledShares += addedShares;
@@ -146,8 +140,8 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
 
         if (filledShares == reqShares) {
             if (bestShares - addedShares) {
-                orderStruct adding(SELL, LIMIT, bestShares - addedShares, bestPrice, bestBid.id);
-                sellLimitInsert(adding);
+                orderStruct adding(BUY, LIMIT, bestShares - addedShares, bestPrice, bestBid.id);
+                buyLimitInsert(adding);
             }
             break;
         }
@@ -175,7 +169,7 @@ string OrderBook::buyLimitOrder(orderStruct oS) {
         if (cheapestAsk.shares + filledShares <= oS.shares) {
             totalCost += (cheapestAsk.shares * cheapestAsk.price);
             filledShares += cheapestAsk.shares;
-            processedOrders[cheapestAsk.id] = cheapestAsk;
+            processedOrders[cheapestAsk.id] = true;
 
             //cout << "Sell limit order " << cheapestAsk.id << " has been fully filled (" << cheapestAsk.shares << " shares at an average price of $" << cheapestAsk.price << ")" << endl;
             removeAsk(0);
@@ -199,7 +193,7 @@ string OrderBook::buyLimitOrder(orderStruct oS) {
     if (filledShares == oS.shares) {
         double avgCost = totalCost / (100.0 * filledShares);
         //cout << "Buy limit order " << oS.id << " has fully filled (" << filledShares << " shares at an average cost of $" << avgCost << ")" << endl;
-        processedOrders[oS.id] = oS;
+        processedOrders[oS.id] = true;
     }
     else if (filledShares > 0) {
         double avgCost = totalCost / (100.0 * filledShares);
@@ -231,7 +225,7 @@ string OrderBook::sellLimitOrder(orderStruct oS) {
         if (filledShares + expensiveBid.shares <= oS.shares) {
             totalProfit += (expensiveBid.shares * expensiveBid.price);
             filledShares += expensiveBid.shares;
-            processedOrders[expensiveBid.id] = expensiveBid;
+            processedOrders[expensiveBid.id] = true;
 
             //cout << "Buy limit order " << expensiveBid.id << " has been fully filled (" << expensiveBid.shares << " shares at an average price of $" << expensiveBid.price << ")" << endl;
             removeBid(0);
@@ -255,7 +249,7 @@ string OrderBook::sellLimitOrder(orderStruct oS) {
     if (filledShares == oS.shares) {
         double avgProfit = totalProfit / (100.0 * filledShares);
         //cout << "Sell limit order " << oS.id << " has fully filled (" << filledShares << " shares at an average price of $" << avgProfit << ")" << endl;
-        processedOrders[oS.id] = oS;
+        processedOrders[oS.id] = true;
     }
     else if (filledShares > 0) {
         double avgProfit = totalProfit / (100.0 * filledShares);
@@ -272,138 +266,6 @@ string OrderBook::sellLimitOrder(orderStruct oS) {
 }
 
 
-
-// Heap Method Implementations
-// ====================================================================================================================================
-int OrderBook::findHeapParent(int child) {
-    return ((child - 1) / 2);
-}
-
-void OrderBook::sellLimitInsert(orderStruct oS) {
-    int cur = sellLimitSize;
-    sellLimitHeap[sellLimitSize] = oS;
-    sellHeapMap[oS.id] = sellLimitSize++;
-
-    //cout << "order struct " << oS.id << " inserted in sell heap at " << sellHeapMap[oS.id] << endl;
-
-    while (cur != 0 && sellLimitHeap[findHeapParent(cur)].price > sellLimitHeap[cur].price) {
-        orderStruct pS = sellLimitHeap[findHeapParent(cur)];
-        sellHeapMap[pS.id] = cur;
-        sellHeapMap[oS.id] = findHeapParent(cur);
-        swap(sellLimitHeap[findHeapParent(cur)], sellLimitHeap[cur]);
-        cur = findHeapParent(cur);
-
-        //cout << "order struct " << pS.id << " swapped to " << sellHeapMap[pS.id] << endl;
-        //cout << "order struct " << oS.id << " swapped to " << sellHeapMap[oS.id] << endl;
-    }
-}
-
-void OrderBook::buyLimitInsert(orderStruct oS) {
-    int cur = buyLimitSize;
-    buyLimitHeap[buyLimitSize] = oS;
-    buyHeapMap[oS.id] = buyLimitSize++;
-
-    //cout << "order struct " << oS.id << " inserted in buy heap at " << buyHeapMap[oS.id] << endl;
-
-    while (cur != 0 && buyLimitHeap[findHeapParent(cur)].price < buyLimitHeap[cur].price) {
-        orderStruct pS = buyLimitHeap[findHeapParent(cur)];
-        buyHeapMap[pS.id] = cur;
-        buyHeapMap[oS.id] = findHeapParent(cur);
-        swap(buyLimitHeap[findHeapParent(cur)], buyLimitHeap[cur]);
-        cur = findHeapParent(cur);
-
-        //cout << "order struct " << pS.id << " swapped to " << buyHeapMap[pS.id] << endl;
-        //cout << "order struct " << oS.id << " swapped to " << buyHeapMap[oS.id] << endl;
-    }
-}
-
-const orderStruct& OrderBook::getMinAsk() {
-    return (sellLimitHeap[0]);
-}
-
-const orderStruct& OrderBook::getMaxBid() {
-    return (buyLimitHeap[0]);
-}
-
-void OrderBook::removeAsk(int heapLoc) {
-    sellLimitSize--;
-
-    orderStruct heapLocoS = sellLimitHeap[heapLoc];
-    orderStruct sLSoS = sellLimitHeap[sellLimitSize];
-    sellHeapMap[sLSoS.id] = heapLoc;
-    sellHeapMap[heapLocoS.id] = -1;
-
-    sellLimitHeap[heapLoc] = sellLimitHeap[sellLimitSize];
-    sellLimitHeap[sellLimitSize].id = -1;
-
-    int cur = heapLoc;
-
-    while (sellLimitHeap[cur].id != -1) {
-        int smallest = cur;
-        int left = 2 * cur + 1;
-        int right = 2 * cur + 2;
-
-        if (left <= sellLimitSize && sellLimitHeap[left].price < sellLimitHeap[smallest].price) {
-            smallest = left;
-        }
-
-        if (right <= sellLimitSize && sellLimitHeap[right].price < sellLimitHeap[smallest].price) {
-            smallest = right;
-        }
-
-        if (smallest == cur) {
-            break;
-        }
-
-        orderStruct curoS = sellLimitHeap[cur];
-        orderStruct smallestoS = sellLimitHeap[smallest];
-        sellHeapMap[curoS.id] = smallest;
-        sellHeapMap[smallestoS.id] = cur;
-
-        swap(sellLimitHeap[cur], sellLimitHeap[smallest]);
-        cur = smallest;
-    }
-}
-
-void OrderBook::removeBid(int heapLoc) {
-    buyLimitSize--;
-
-    orderStruct heapLocoS = buyLimitHeap[heapLoc];
-    orderStruct bLSoS = buyLimitHeap[buyLimitSize];
-    buyHeapMap[bLSoS.id] = heapLoc;
-    buyHeapMap[heapLocoS.id] = -1;
-
-    buyLimitHeap[heapLoc] = buyLimitHeap[buyLimitSize];
-    buyLimitHeap[buyLimitSize].id = -1;
-
-    int cur = heapLoc;
-
-    while (buyLimitHeap[cur].id != -1) {
-        int largest = cur;
-        int left = 2 * cur + 1;
-        int right = 2 * cur + 2;
-
-        if (left <= buyLimitSize && buyLimitHeap[left].price > buyLimitHeap[largest].price) {
-            largest = left;
-        }
-
-        if (right <= buyLimitSize && buyLimitHeap[right].price > buyLimitHeap[largest].price) {
-            largest = right;
-        }
-
-        if (largest == cur) {
-            break;
-        }
-
-        orderStruct curoS = buyLimitHeap[cur];
-        orderStruct largestoS = buyLimitHeap[largest];
-        buyHeapMap[largestoS.id] = cur;
-        buyHeapMap[curoS.id] = largest;
-
-        swap(buyLimitHeap[cur], buyLimitHeap[largest]);
-        cur = largest;
-    }
-}
 
 // Market Info Methods
 // ====================================================================================================================================
