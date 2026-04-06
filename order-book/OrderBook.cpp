@@ -317,11 +317,11 @@ void OrderBook::buyLimitInsert(orderStruct oS) {
     }
 }
 
-orderStruct OrderBook::getMinAsk() {
+const orderStruct& OrderBook::getMinAsk() {
     return (sellLimitHeap[0]);
 }
 
-orderStruct OrderBook::getMaxBid() {
+const orderStruct& OrderBook::getMaxBid() {
     return (buyLimitHeap[0]);
 }
 

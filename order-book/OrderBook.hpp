@@ -76,8 +76,8 @@ namespace Order {
             void sellLimitInsert (orderStruct oS);
             void buyLimitInsert (orderStruct oS);
     
-            orderStruct getMinAsk();
-            orderStruct getMaxBid();
+            const orderStruct& getMinAsk();
+            const orderStruct& getMaxBid();
     
             void removeAsk(int heapLoc);
             void removeBid(int heapLoc);
