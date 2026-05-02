@@ -1,0 +1,86 @@
+Unable to determine clock rate from sysctl: hw.cpufrequency: No such file or directory
+This does not affect benchmark measurements, only the metadata output.
+***WARNING*** Failed to set thread affinity. Estimated CPU frequency may be incorrect.
+2026-04-04T12:54:12-07:00
+Running ./benchmark_runner
+Run on (10 X 24 MHz CPU s)
+CPU Caches:
+  L1 Data 64 KiB
+  L1 Instruction 128 KiB
+  L2 Unified 4096 KiB (x10)
+Load Average: 3.00, 2.84, 2.56
+First benchmark
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        743 ns          737 ns       985527
+
+
+Converting strings to enums (No heap allocation work)
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        652 ns          645 ns      1145532
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        704 ns          680 ns      1015420
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        640 ns          635 ns      1137656
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        615 ns          613 ns      1186823
+
+
+
+
+Converting doubles to int (price representation in cents)
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        513 ns          514 ns      1344086
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        517 ns          517 ns      1000000
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        512 ns          511 ns      1000000
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        518 ns          519 ns      1308069
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        513 ns          513 ns      1000000
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        523 ns          522 ns      1378224
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        525 ns          525 ns      1371823
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        523 ns          522 ns      1340739
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        521 ns          519 ns      1377221
+------------------------------------------------------------
+
+
+
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        456 ns          458 ns      1552602
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_shallowLatency        472 ns          475 ns      1480466
