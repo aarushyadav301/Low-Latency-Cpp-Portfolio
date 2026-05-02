@@ -104,8 +104,8 @@ string OrderBook::buyMarketOrder(orderStruct oS) {
         bestAsk = getMinAsk();
     }
 
-    cout << "BEST BUY: " << getMaxBid().price << endl;
-    cout << "BEST SELL: " << getMinAsk().price << endl;
+    //cout << "BEST BUY: " << getMaxBid().price << endl;
+    //cout << "BEST SELL: " << getMinAsk().price << endl;
 
     if (filledShares == 0) {
         //cout << "Buy market order " << oS.id << " failed with 0 shares filled" << endl;
@@ -152,8 +152,8 @@ string OrderBook::sellMarketOrder(orderStruct oS) {
         bestBid = getMaxBid();
     }
 
-    cout << "BEST BUY: " << getMaxBid().price << endl;
-    cout << "BEST SELL: " << getMinAsk().price << endl;
+    //cout << "BEST BUY: " << getMaxBid().price << endl;
+    //cout << "BEST SELL: " << getMinAsk().price << endl;
 
     //string output = "SOLD " + to_string(filledShares) + " shares for a total gain of $" + to_string(totalGain);
     //cout << output << endl;
@@ -213,8 +213,8 @@ string OrderBook::buyLimitOrder(orderStruct oS) {
         buyLimitInsert(oS);
     }
 
-    cout << "BEST BUY: " << getMaxBid().price << endl;
-    cout << "BEST SELL: " << getMinAsk().price << endl;
+    //cout << "BEST BUY: " << getMaxBid().price << endl;
+    //cout << "BEST SELL: " << getMinAsk().price << endl;
 
     return("");
 }
@@ -273,8 +273,8 @@ string OrderBook::sellLimitOrder(orderStruct oS) {
         sellLimitInsert(oS);
     }
 
-    cout << "BEST BUY: " << getMaxBid().price << endl;
-    cout << "BEST SELL: " << getMinAsk().price << endl;
+    //cout << "BEST BUY: " << getMaxBid().price << endl;
+    //cout << "BEST SELL: " << getMinAsk().price << endl;
 
     return ("");
 }
